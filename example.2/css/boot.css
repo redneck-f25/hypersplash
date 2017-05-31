@@ -1,0 +1,66 @@
+/* hide body immediately */
+html.hypersplash-loading > body {
+    visibility: hidden;
+}
+/* fade in splash screen */
+body.hypersplash-loading #hypersplash-overlay,
+html.bootstrap body.hypersplash-loading #bootstrap-splash-overlay {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s linear, opacity 0.25s linear;
+}
+/* show body behind splash screen */
+html.hypersplash-loading > body.hypersplash-loading {
+    visibility: visible;
+    transition: visibility 0s linear 0.25s;
+}
+/* fade out splash screen */
+#hypersplash-overlay,
+html.bootstrap #hypersplash-overlay,
+#bootstrap-splash-overlay {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.75s linear, visibility 0s linear 0.75s;
+}
+#hypersplash-overlay {
+    position: absolute; z-index: 100000;
+    top: 0; left: 0; width: 100%; height: 100%; text-align: center;
+    font: bold 20px/20px Consolas,monospace;
+    color: rgb(0,255,0); background-color: rgba(0,0,0,1);
+    /* background-color: black; */
+}
+#hypersplash-overlay > * {
+    position: absolute; top: 50%; width: 100%; margin-top: -8px;
+}
+#hypersplash-overlay > * > *:first-child {
+    padding-left: 22px;
+    background-image: url( "data:image/gif;base64,R0lGODlhFAAUAOMIAAAAABoaGjMzM0xMTGZmZoCAgJmZmbKysv///////////////////////////////yH/C05FVFNDQVBFMi4wAwEAAAAh+QQBCgAIACwAAAAAFAAUAAAEUxDJSau9CADMteZTEEjehhzHJYqkiaLWOlZvGs8WDO6UIPAGw8TnAwWDEuKPcxQml0YnjzcYYAqFS7VqwWItWyuCQJB4s2AxmWxGg9bl6YQtl0cAACH5BAEKAA8ALAAAAAAUABQAAART8MlJq70vBMy15pMgSN72AMAliqSJotY6Vm8azxYM7tQw8IfDxOcDBYMS4o9zFCaXRiePRyBgDIZLtWrBYi1b66NQkHizYDGZbEaD1uXphC2XRwAAIfkEAQoADwAsAAAAABQAFAAABFPwyUmrvU8IzLXm0zBI3vYEwSWKpImi1jpWbxrPFgzuFEHwAMDE5wMFgxLij3MUJpdGJ49XKGAOh0u1asFiLVvrw2CQeLNgMZlsRoPW5emELZdHAAAh+QQBCgAPACwAAAAAFAAUAAAEU/DJSau9bwzMteYTQUje9gjCJYqkiaLWOlZvGs8WDO5UUfCBwMTnAwWDEuKPcxQml0Ynj2cwYACAS7VqwWItW+vjcJB4s2AxmWxGg9bl6YQtl0cAACH5BAEKAA8ALAAAAAAUABQAAART8MlJq72PEMy15lNRSN72DMMliqSJotY6Vm8azxYM7pRh8ALBxOcDBYMS4o9zFCaXRiePdzhgAoFLtWrBYi1b6wMAkHizYDGZbEaD1uXphC2XRwAAIfkEAQoADwAsAAAAABQAFAAABFPwyUmrva8UzLXmk2FI3vYQxCWKpImi1jpWbxrPFgzu1HHwg8HE5wMFgxLij3MUJpdGJ48HAGAEgku1asFiLVvrIxCQeLNgMZlsRoPW5emELZdHAAAh+QQBCgAPACwAAAAAFAAUAAAEU/DJSau9zxjMtebTcUje9hTFJYqkiaLWOlZvGs8WDO4UAPAEwsTnAwWDEuKPcxQml0YnjxcIYAaDS7VqwWItW+tDIJB4s2AxmWxGg9bl6YQtl0cAACH5BAEKAA8ALAAAAAAUABQAAART8MlJq73vHMy15hMASN72GMYliqSJotY6Vm8azxYM7lQQ8IXCxOcDBYMS4o9zFCaXRiePJxBgCIRLtWrBYi1b62MwkHizYDGZbEaD1uXphC2XRwAAOw== ");
+    background-position-y: 2px;
+    background-repeat: no-repeat;
+}
+#hypersplash-overlay.error {
+    color: rgb(255,0,0);
+}
+#hypersplash-overlay.error > * > * {
+    background-image: none;
+}
+#hypersplash-overlay .hyper-progress-bar, #hypersplash-overlay .hyper-progress-bar > span {
+    display: inline-block;
+    height: 16px;
+    box-sizing: content-box;
+    text-align: left;
+}
+#hypersplash-overlay .hyper-progress-bar {
+    width: 300px;
+    border: solid 1px lime;
+}
+#hypersplash-overlay .hyper-progress-bar > span {
+    background-color: lime;
+    width: 0;
+}
+#bootstrap-splash-overlay {
+    position: absolute;  z-index: 100001;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: white;
+}
+.hypersplash-loading, .hypersplash-loading body { overflow: hidden; }

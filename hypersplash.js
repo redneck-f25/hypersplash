@@ -54,6 +54,15 @@ var cssClassName = splashScript.dataset.cssClassName;
 var errorEventName = splashScript.dataset.errorEventName;
 var progressEventName = splashScript.dataset.progressEventName;
 
+var urlReplacer = splashScript.dataset.urlReplacer;
+
+if ( urlReplacer ) {
+    
+}
+var urlReplacer = function( url, module, type ) {
+    return url;
+}
+
 // add the css class name to <head> immediately (before initial rendering)
 cssClassName && document.documentElement.classList.add( cssClassName );
 
@@ -75,7 +84,7 @@ function loadModulesConf( modulesConfUrl ) {
     // TODO: handle error
     var req = new XMLHttpRequest();
     // TODO: think about caching
-    modulesConfUrl += '?' + Date.now().valueOf()
+    // modulesConfUrl += '?nocache=' + Date.now().valueOf()
     req.open( 'GET', modulesConfUrl, true );
     req.overrideMimeType( 'application/json' );
     req.onreadystatechange = function () {
@@ -221,6 +230,7 @@ function loadComponent( moduleName, componentType, componentSource ) {
     switch( componentType ) {
         case 'js':
             var script = document.head.appendChild( document.createElement( 'script' ) );
+            //componentSource += '?nocache=' + Date.now().valueOf()
             script.src = componentSource;
             script.addEventListener( 'load', onComponentLoaded );
             script.addEventListener( 'error', onError );
