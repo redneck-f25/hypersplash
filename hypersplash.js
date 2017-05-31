@@ -34,38 +34,44 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+// TODO: add counter for loaded and remaining components to detect disruption
+//       in module dependencies
+
 function nextTick( fn ) {
     setTimeout( fn, 0 );
 }
 
-var bootScript = [].slice.call( document.getElementsByTagName( 'script' ) ).pop();
+var splashScript = [].slice.call( document.getElementsByTagName( 'script' ) ).pop();
 var toLoadMap = {};
 var score = 0;
 
-var cssClassName = bootScript.dataset.cssClassName;
-var errorEventName = bootScript.dataset.errorEventName;
-var progressEventName = bootScript.dataset.progressEventName;
+var cssClassName = splashScript.dataset.cssClassName;
+var errorEventName = splashScript.dataset.errorEventName;
+var progressEventName = splashScript.dataset.progressEventName;
+
+// add the css class name to <head> immediately (before initial rendering)
 cssClassName && document.documentElement.classList.add( cssClassName );
 
 addEventListener( 'load', function(){
+    // add the css class name to <body> after loading (after initial rendering)
     cssClassName && document.body.classList.add( cssClassName );
 
-    var modulesDefUrl = bootScript.dataset.modulesDef;
-    if ( bootScript.dataset.debugRegexp && bootScript.dataset.debugModulesDef ) {
-        if ( new RegExp( bootScript.dataset.debugRegexp ).test( location.toString() ) ) {
-            modulesDefUrl = bootScript.dataset.debugModulesDef;
+    var modulesConfUrl = splashScript.dataset.modulesDef;
+    if ( splashScript.dataset.debugRegexp && splashScript.dataset.debugModulesDef ) {
+        if ( new RegExp( splashScript.dataset.debugRegexp ).test( location.toString() ) ) {
+            modulesConfUrl = splashScript.dataset.debugModulesDef;
         }
     }
 
-    loadModuleDef( modulesDefUrl );
+    loadModulesConf( modulesConfUrl );
 });
 
-function loadModuleDef( modulesDefUrl ) {
+function loadModulesConf( modulesConfUrl ) {
     // TODO: handle error
     var req = new XMLHttpRequest();
     // TODO: think about caching
-    modulesDefUrl += '?' + Date.now().valueOf()
-    req.open( 'GET', modulesDefUrl, true );
+    modulesConfUrl += '?' + Date.now().valueOf()
+    req.open( 'GET', modulesConfUrl, true );
     req.overrideMimeType( 'application/json' );
     req.onreadystatechange = function () {
         if ( this.readyState != 4 ) {
@@ -77,17 +83,19 @@ function loadModuleDef( modulesDefUrl ) {
     req.send();
 }
 
-function loadModules( modulesDef ) {
-    for ( var moduleName in modulesDef ) {
-        var moduleDef = modulesDef[ moduleName ];
-        score += moduleDef[ 1 ],
+function loadModules( modulesConf ) {
+    // build initial map with 'wants'-references 
+    for ( var moduleName in modulesConf ) {
+        var moduleConf = modulesConf[ moduleName ];
+        score += moduleConf[ 1 ],
         toLoadMap[ moduleName ] = {
             name: moduleName,
-            components: moduleDef[ 1 ],
-            wants: moduleDef[ 0 ],
+            components: moduleConf[ 1 ],
+            wants: moduleConf[ 0 ],
             wantedBy: {}
         };
     }
+    // make reverse 'wanted-by'-references
     for ( var moduleName in toLoadMap ) {
         var module = toLoadMap[ moduleName ];
         if ( module.wants.length === 0 ) {
@@ -101,11 +109,11 @@ function loadModules( modulesDef ) {
 function loadModule( moduleName ) {
     var module = toLoadMap[ moduleName ];
     for ( var componentType in module.components ) {
-        var components = module.components[ componentType ];
-        if ( typeof components === 'string' ) {
-            module.components[ componentType ] = components = [ components ];
+        var componentsByType = module.components[ componentType ];
+        if ( typeof componentsByType === 'string' ) {
+            module.components[ componentType ] = componentsByType = [ componentsByType ];
         }
-        components.forEach( function( componentSource ){
+        componentsByType.forEach( function( componentSource ){
             nextTick( loadComponent.bind( null, moduleName, componentType, componentSource ) );
         });
     }
