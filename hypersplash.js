@@ -54,13 +54,14 @@ var cssClassName = splashScript.dataset.cssClassName;
 var errorEventName = splashScript.dataset.errorEventName;
 var progressEventName = splashScript.dataset.progressEventName;
 
-var urlReplacer = splashScript.dataset.urlReplacer;
+var debugMode = false;
 
+// callback to modify URLs
+var urlReplacer = splashScript.dataset.urlReplacer;
 if ( urlReplacer ) {
-    
-}
-var urlReplacer = function( url, module, type ) {
-    return url;
+    urlReplacer = Function( 'DEBUG', 'url', 'module', 'type', urlReplacer );
+} else {
+    urlReplacer = function( DEBUG, url ) { return url; };
 }
 
 // add the css class name to <head> immediately (before initial rendering)
@@ -73,6 +74,7 @@ addEventListener( 'load', function(){
     var modulesConfUrl = splashScript.dataset.modulesDef;
     if ( splashScript.dataset.debugRegexp && splashScript.dataset.debugModulesDef ) {
         if ( new RegExp( splashScript.dataset.debugRegexp ).test( location.toString() ) ) {
+            debugMode = true;
             modulesConfUrl = splashScript.dataset.debugModulesDef;
         }
     }
@@ -83,9 +85,7 @@ addEventListener( 'load', function(){
 function loadModulesConf( modulesConfUrl ) {
     // TODO: handle error
     var req = new XMLHttpRequest();
-    // TODO: think about caching
-    // modulesConfUrl += '?nocache=' + Date.now().valueOf()
-    req.open( 'GET', modulesConfUrl, true );
+    req.open( 'GET', urlReplacer( debugMode, modulesConfUrl ), true );
     req.overrideMimeType( 'application/json' );
     req.onreadystatechange = function () {
         if ( this.readyState != 4 ) {
@@ -165,6 +165,7 @@ function loadModule( moduleName ) {
 function loadComponent( moduleName, componentType, componentSource ) {
     if ( failed ) return;
     var module = toLoadMap[ moduleName ];
+    componentSource = urlReplacer( debugMode, componentSource, moduleName, componentType );
 
     function onComplete() {
         cssClassName && nextTick( function() {
@@ -230,7 +231,6 @@ function loadComponent( moduleName, componentType, componentSource ) {
     switch( componentType ) {
         case 'js':
             var script = document.head.appendChild( document.createElement( 'script' ) );
-            //componentSource += '?nocache=' + Date.now().valueOf()
             script.src = componentSource;
             script.addEventListener( 'load', onComponentLoaded );
             script.addEventListener( 'error', onError );
@@ -242,7 +242,6 @@ function loadComponent( moduleName, componentType, componentSource ) {
             link.href = componentSource;
             link.addEventListener( 'load', function( event ) {
                 // handle error in ie and edge
-                // debugger;
                 try {
                     event.target.sheet.cssText;
                     onComponentLoaded.call( link, event );

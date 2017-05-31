@@ -109,7 +109,7 @@ addEventListener( 'hypersplash-progress', function( event ) {
     data-css-class-name="hypersplash-loading"
     data-error-event-name="hypersplash-error"
     data-progress-event-name="hypersplash-progress"
-    data-url-replacer="return url;"
+    data-url-replacer="return url + ( DEBUG ? '?nocache=' + Date.now().valueOf() : '' );"
     data-modules-def="hypersplash-modules.json"
     data-debug-regexp="^[^#]*?(\\?|&amp;)debug(=|&amp;|#|$)"
     data-debug-modules-def="hypersplash-modules-debug.json"
