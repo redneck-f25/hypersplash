@@ -1,22 +1,16 @@
 {
-    "jquery": [ [], {
-        "js": [ "https://code.jquery.com/jquery-3.2.1.min.js" ]
-    }],
-    "bootstrap": [ [ "jquery" ], {
+    "jquery": [ { "js": [ "https://code.jquery.com/jquery-3.2.1.min.js" ], "css": [] } ],
+    "bootstrap-delay": [ [ "jquery" ], { "js": "https://friday.w3tools.de/cgi-bin/sleep1.cgi" } ],
+    "bootstrap": [ [ "bootstrap-delay" ], {
         "js": [ "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ],
         "css": [ "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" ]
     }],
-    "lib1": [ [], {
+    "lib1": [ [ "bootstrap" ], {
         "js":  "js/lib1.js",
-        "css": "https://friday.w3tools.de/cgi-bin/sleep3.cgi"
+        "css": "https://friday.w3tools.de/cgi-bin/sleep1.cgi"
     }],
-    "lib2": [ [ "lib1" ], {
-        "js": "js/lib2.js"
-    }],
-    "delay": [ [], {
-        "js": "https://friday.w3tools.de/cgi-bin/sleep3.cgi"
-    } ],
-    "app": [ [ "delay", "bootstrap", "lib2" ], {
-        "js": "js/app.js"
-    }]
+    "lib2": [ [ "lib1" ], { "js": "js/lib2.js" } ],
+    "delay1": [ { "js": "https://friday.w3tools.de/cgi-bin/sleep3.cgi" } ],
+    "delay2": [ [ "delay1" ], { "js": "https://friday.w3tools.de/cgi-bin/sleep1.cgi" } ],
+    "app": [ [ "delay2", "bootstrap", "lib2" ], { "js": "js/app.js" } ]
 }

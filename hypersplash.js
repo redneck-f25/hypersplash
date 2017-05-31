@@ -92,10 +92,17 @@ function parseModulesConf( modulesConf ) {
     // build initial map with 'wants'-references 
     for ( var moduleName in modulesConf ) {
         var moduleConf = modulesConf[ moduleName ];
+        if ( moduleConf[ 0 ] instanceof Array ) {
+            var wants = moduleConf[ 0 ];
+            var components = moduleConf[ 1 ];
+        } else {
+            var wants = [];
+            var components = moduleConf[ 0 ];
+        }
         toLoadMap[ moduleName ] = {
             name: moduleName,
-            components: moduleConf[ 1 ],
-            wants: moduleConf[ 0 ],
+            components: components,
+            wants: wants,
             wantedBy: {}
         };
     }
@@ -107,6 +114,9 @@ function parseModulesConf( modulesConf ) {
             var componentsByType = module.components[ componentType ];
             if ( typeof componentsByType === 'string' ) {
                 module.components[ componentType ] = componentsByType = [ componentsByType ];
+            } else if ( componentsByType.length === 0 ) {
+                delete module.components[ componentType ];
+                continue;
             }
             componentsCount += componentsByType.length;
         }
