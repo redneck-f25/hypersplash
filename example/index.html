@@ -46,13 +46,27 @@ html.hypersplash-loading > body.hypersplash-loading {
 #hypersplash-overlay.error > * > * {
     background-image: none;
 }
+#hypersplash-overlay .hyper-progress-bar, #hypersplash-overlay .hyper-progress-bar > span {
+    display: inline-block;
+    height: 16px;
+    box-sizing: content-box;
+    text-align: left;
+}
+#hypersplash-overlay .hyper-progress-bar {
+    width: 300px;
+    border: solid 1px lime;
+}
+#hypersplash-overlay .hyper-progress-bar > span {
+    background-color: lime;
+    width: 0;
+}
 .hypersplash-loading, .hypersplash-loading body { overflow: hidden; }
 </style>
 <script>
 addEventListener( 'hypersplash-error', function( event ) {
     var splash = document.getElementById( 'hypersplash-overlay' );
     splash.classList.add( 'error' );
-    splash.firstElementChild.firstElementChild.innerText = 'Fatal error in startup sequence.';
+    splash.firstElementChild.firstElementChild.innerText = 'Fatal error in startup sequence. ' + event.detail.message;
     splash.firstElementChild.appendChild( document.createElement( 'br' ) );
     var link = splash.firstElementChild.appendChild( document.createElement( 'a' ) );
     link.href = 'javascript:location.reload();';
@@ -61,7 +75,8 @@ addEventListener( 'hypersplash-error', function( event ) {
 });
 addEventListener( 'hypersplash-progress', function( event ) {
     var splash = document.getElementById( 'hypersplash-overlay' );
-    splash.firstElementChild.children[ 2 ].insertAdjacentHTML( 'beforeEnd', event.detail.componentSource + '<br>' );
+    splash.firstElementChild.children[ 2 ].firstElementChild.style.width = `${100.0 * event.detail.rate}%`;
+    //splash.firstElementChild.children[ 2 ].insertAdjacentHTML( 'beforeEnd', event.detail.rate + '<br>' );
 });
 </script>
 <script src="../hypersplash.js"
@@ -74,7 +89,7 @@ addEventListener( 'hypersplash-progress', function( event ) {
 ></script>
 </head>
 <body>
-<div id="hypersplash-overlay"><div><span>Startup sequence in progress...</span><br><span></span></div></div>
+<div id="hypersplash-overlay"><div><span>Startup sequence in progress...</span><br><span class="hyper-progress-bar"><span></span></span></div></div>
 
 <div class="panel panel-primary">
   <div class="panel-heading">

@@ -43,7 +43,12 @@ function nextTick( fn ) {
 
 var splashScript = [].slice.call( document.getElementsByTagName( 'script' ) ).pop();
 var toLoadMap = {};
-var score = 0;
+
+var componentsCount = 0;
+var componentsLoadedCount = 0;
+var modulesCount = 0;
+var modulesInQueueCount = 0;
+var failed = false;
 
 var cssClassName = splashScript.dataset.cssClassName;
 var errorEventName = splashScript.dataset.errorEventName;
@@ -78,16 +83,15 @@ function loadModulesConf( modulesConfUrl ) {
             return;
         }
         var modulesDef = JSON.parse( this.responseText );
-        nextTick( loadModules.bind( null, modulesDef ) );
+        nextTick( parseModulesConf.bind( null, modulesDef ) );
     };
     req.send();
 }
 
-function loadModules( modulesConf ) {
+function parseModulesConf( modulesConf ) {
     // build initial map with 'wants'-references 
     for ( var moduleName in modulesConf ) {
         var moduleConf = modulesConf[ moduleName ];
-        score += moduleConf[ 1 ],
         toLoadMap[ moduleName ] = {
             name: moduleName,
             components: moduleConf[ 1 ],
@@ -98,21 +102,41 @@ function loadModules( modulesConf ) {
     // make reverse 'wanted-by'-references
     for ( var moduleName in toLoadMap ) {
         var module = toLoadMap[ moduleName ];
+        ++modulesCount;
+        for ( var componentType in module.components ) {
+            var componentsByType = module.components[ componentType ];
+            if ( typeof componentsByType === 'string' ) {
+                module.components[ componentType ] = componentsByType = [ componentsByType ];
+            }
+            componentsCount += componentsByType.length;
+        }
         if ( module.wants.length === 0 ) {
+            ++modulesInQueueCount;
             nextTick( loadModule.bind( null, moduleName ) );
         } else for ( var ii = module.wants.length; ii; ) {
-            toLoadMap[ module.wants[ --ii ] ].wantedBy[ moduleName ] = true;
+            var prerequisiteName = module.wants[ --ii ];
+            if ( toLoadMap.hasOwnProperty( prerequisiteName ) ) {
+                toLoadMap[ prerequisiteName ].wantedBy[ moduleName ] = true;
+            } else {
+                dispatchError({ message: `Unresolved dependency ${prerequisiteName} for module ${moduleName}.` });
+            }
         }
+    }
+    if ( !modulesInQueueCount ) {
+        dispatchError({ message: `No module w/o dependencies found.` });
     }
 }
 
+function dispatchError( detail ) {
+    failed = true;
+    errorEventName && window.dispatchEvent( new CustomEvent( errorEventName, { detail: detail }));
+}
+
 function loadModule( moduleName ) {
+    if ( failed ) return;
     var module = toLoadMap[ moduleName ];
     for ( var componentType in module.components ) {
         var componentsByType = module.components[ componentType ];
-        if ( typeof componentsByType === 'string' ) {
-            module.components[ componentType ] = componentsByType = [ componentsByType ];
-        }
         componentsByType.forEach( function( componentSource ){
             nextTick( loadComponent.bind( null, moduleName, componentType, componentSource ) );
         });
@@ -120,6 +144,7 @@ function loadModule( moduleName ) {
 }
 
 function loadComponent( moduleName, componentType, componentSource ) {
+    if ( failed ) return;
     var module = toLoadMap[ moduleName ];
 
     function onComplete() {
@@ -136,22 +161,28 @@ function loadComponent( moduleName, componentType, componentSource ) {
                 var dependent = toLoadMap[ dependentName ];
                 dependent.wants.splice( dependent.wants.indexOf( moduleName ), 1 );
                 if ( dependent.wants.length === 0 ) {
+                    ++modulesInQueueCount;
                     nextTick( loadModule.bind( null, dependentName ) );
                 }
             }
             delete toLoadMap[ moduleName ];
-            if ( Object.getOwnPropertyNames( toLoadMap ).length === 0 ) {
+            var modulesToLoadCount = Object.getOwnPropertyNames( toLoadMap ).length;
+            if ( 0 === --modulesInQueueCount && 0 !== modulesToLoadCount ) {
+                dispatchError({ message: 'Circular reference in dependencies.' });
+            } else if ( 0 === modulesToLoadCount ) {
                 nextTick( onComplete );
             }
         }
     }
 
     function onComponentLoaded( event ) {
+        var rate = 1.0 * ++componentsLoadedCount / componentsCount;
         module.components[ componentType ].splice( module.components[ componentType ].indexOf( componentSource ), 1 );
         if ( module.components[ componentType ].length === 0 ) {
             nextTick( onModuleLoaded );
         }
-        progressEventName && window.dispatchEvent( new CustomEvent( progressEventName, { 'detail': {
+        progressEventName && window.dispatchEvent( new CustomEvent( progressEventName, { detail: {
+            rate: rate,
             moduleName: moduleName,
             componentType: componentType,
             componentSource: componentSource,
@@ -160,12 +191,13 @@ function loadComponent( moduleName, componentType, componentSource ) {
     }
 
     function onError( event ) {
-        errorEventName && window.dispatchEvent( new CustomEvent( errorEventName, { 'detail': {
+        dispatchError({
+            message: `Cannot load component "${componentSource}" of module "${moduleName}"`,
             moduleName: moduleName,
             componentType: componentType,
             componentSource: componentSource,
             event: event
-        }}));
+        });
     }
 
     switch( componentType ) {
@@ -185,9 +217,9 @@ function loadComponent( moduleName, componentType, componentSource ) {
                 // debugger;
                 try {
                     event.target.sheet.cssText;
-                    onComponentLoaded( link, event );
+                    onComponentLoaded.call( link, event );
                 } catch ( e ) {
-                    onError( link, event );
+                    onError.call( link, event );
                 }
              });
             link.addEventListener( 'error', onError );

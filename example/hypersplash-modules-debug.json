@@ -13,10 +13,13 @@
     "lib2": [ [ "lib1" ], {
         "js": "js/lib2.js"
     }],
-    "delay": [ [], {
+    "delay1": [ [], {
         "js": "https://friday.w3tools.de/cgi-bin/sleep3.cgi"
     } ],
-    "app": [ [ "delay", "bootstrap", "lib2" ], {
+    "delay2": [ [ "delay1" ], {
+        "js": "https://friday.w3tools.de/cgi-bin/sleep3.cgi"
+    } ],
+    "app": [ [ "delay2", "bootstrap", "lib2" ], {
         "js": "js/app.js"
     }]
 }
