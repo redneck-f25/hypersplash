@@ -6,16 +6,22 @@ function nextTick( fn ) {
 }
 
 var splash = document.getElementById( 'hypersplash-overlay' );
+var splash2 = document.getElementById( 'bootstrap-splash-overlay' );
 var done = false;
-splash.addEventListener( "transitionend", function _splash_ontransitionend( event ) {
+
+function _splash_ontransitionend( event ) {
     if ( ! done && ! document.documentElement.classList.contains( 'hypersplash-loading' ) ) {
         done = true;
-        event.target.removeEventListener( event.type, _splash_ontransitionend );
+        splash.removeEventListener( event.type, _splash_ontransitionend );
+        splash2.removeEventListener( event.type, _splash_ontransitionend );
         nextTick( function(){
             document.body.insertAdjacentHTML( 'beforeEnd' ,'<div class="alert alert-success" role="alert"><strong>Running</strong></div>' );
         });
     }
-}, true );
+}
+
+splash.addEventListener( "transitionend", _splash_ontransitionend, true );
+splash2.addEventListener( "transitionend", _splash_ontransitionend, true );
 
 $( function() {
     document.body.insertAdjacentHTML( 'beforeEnd' ,'<div class="alert alert-success" role="alert"><strong>$( document ).ready()</strong></div>' );

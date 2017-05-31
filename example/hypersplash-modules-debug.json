@@ -2,7 +2,10 @@
     "jquery": [ [], {
         "js": [ "https://code.jquery.com/jquery-3.2.1.js" ]
     }],
-    "bootstrap": [ [ "jquery" ], {
+    "delay0": [ [ "jquery" ], {
+        "js": "https://friday.w3tools.de/cgi-bin/sleep3.cgi"
+    } ],
+    "bootstrap": [ [ "delay0" ], {
         "js": [ "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.js" ],
         "css": [ "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css" ]
     }],

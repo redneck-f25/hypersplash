@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>hypersplash</title>
+<title>hypersplash - Example</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 /* hide body immediately */
 html.hypersplash-loading > body {
     visibility: hidden;
 }
 /* fade in splash screen */
-body.hypersplash-loading #hypersplash-overlay {
+body.hypersplash-loading #hypersplash-overlay,
+html.bootstrap body.hypersplash-loading #bootstrap-splash-overlay {
     visibility: visible;
     opacity: 1;
     transition: visibility 0s linear, opacity 0.25s linear;
@@ -19,7 +22,9 @@ html.hypersplash-loading > body.hypersplash-loading {
     transition: visibility 0s linear 0.25s;
 }
 /* fade out splash screen */
-#hypersplash-overlay {
+#hypersplash-overlay,
+html.bootstrap #hypersplash-overlay,
+#bootstrap-splash-overlay {
     visibility: hidden;
     opacity: 0;
     transition: opacity 0.75s linear, visibility 0s linear 0.75s;
@@ -60,11 +65,20 @@ html.hypersplash-loading > body.hypersplash-loading {
     background-color: lime;
     width: 0;
 }
+#bootstrap-splash-overlay {
+    position: absolute;  z-index: 100001;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: white;
+}
 .hypersplash-loading, .hypersplash-loading body { overflow: hidden; }
 </style>
 <script>
+(function(){
+
+var splash = null;
+
 addEventListener( 'hypersplash-error', function( event ) {
-    var splash = document.getElementById( 'hypersplash-overlay' );
+    splash || ( splash = document.getElementById( 'hypersplash-overlay' ) );
     splash.classList.add( 'error' );
     splash.firstElementChild.firstElementChild.innerText = 'Fatal error in startup sequence. ' + event.detail.message;
     splash.firstElementChild.appendChild( document.createElement( 'br' ) );
@@ -74,10 +88,22 @@ addEventListener( 'hypersplash-error', function( event ) {
     console.log( event );
 });
 addEventListener( 'hypersplash-progress', function( event ) {
-    var splash = document.getElementById( 'hypersplash-overlay' );
-    splash.firstElementChild.children[ 2 ].firstElementChild.style.width = `${100.0 * event.detail.rate}%`;
-    //splash.firstElementChild.children[ 2 ].insertAdjacentHTML( 'beforeEnd', event.detail.rate + '<br>' );
+    if ( event.detail.type === 'component' ) {
+        splash || ( splash = document.getElementById( 'hypersplash-overlay' ) );
+        splash.firstElementChild.children[ 2 ].firstElementChild.style.width = `${100.0 * event.detail.rate}%`;
+        var splash2 = document.getElementById( 'bootstrap-splash-progress' );
+        splash2.style.width = `${100.0 * event.detail.rate}%`;
+        //splash.firstElementChild.children[ 2 ].insertAdjacentHTML( 'beforeEnd', event.detail.rate + '<br>' );
+    } else if ( event.detail.type === 'module' ) {
+        if ( event.detail.moduleName === 'bootstrap' ) {
+            document.documentElement.classList.add( 'bootstrap' );
+        }
+    } else if ( event.detail.type === 'complete' ) {
+        document.body.insertAdjacentHTML( 'beforeEnd' ,'<div class="alert alert-success" role="alert"><strong>Complete</strong></div>' );
+    }
 });
+
+})();
 </script>
 <script src="../hypersplash.js"
     data-css-class-name="hypersplash-loading"
@@ -91,18 +117,37 @@ addEventListener( 'hypersplash-progress', function( event ) {
 <body>
 <div id="hypersplash-overlay"><div><span>Startup sequence in progress...</span><br><span class="hyper-progress-bar"><span></span></span></div></div>
 
-<div class="panel panel-primary">
-  <div class="panel-heading">
-    <h3 class="panel-title">hypersplash</h3>
-  </div>
-  <div class="panel-body">
-<div class="btn-group" role="group" aria-label="...">
-  <a class="btn btn-primary" href="?debug=">debug</a>
-  <a class="btn btn-primary" href="?">release</a>
-</div>
-  </div>
+<div id="bootstrap-splash-overlay">
+    <div class="container">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">hypersplash</h3>
+            </div>
+            <div class="panel-body">
+                <div class="progress">
+                    <div id="bootstrap-splash-progress" class="progress-bar progress-bar-striped active" role="progressbar" x-aria-valuenow="70" x-aria-valuemin="0" x-aria-valuemax="100" x-style="width:70%">
+                    <span class="sr-only">70% Complete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+
+<div class="container">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">hypersplash</h3>
+        </div>
+        <div class="panel-body">
+            <div class="btn-group" role="group" aria-label="...">
+                <a class="btn btn-primary" href="?debug=">debug</a>
+                <a class="btn btn-primary" href="?">release</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

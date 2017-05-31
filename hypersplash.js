@@ -152,6 +152,9 @@ function loadComponent( moduleName, componentType, componentSource ) {
             document.documentElement.classList.remove( cssClassName );
             document.body.classList.remove( cssClassName );
         });
+        progressEventName && window.dispatchEvent( new CustomEvent( progressEventName, { detail: {
+            type: 'complete',
+        }}));
     }
 
     function onModuleLoaded() {
@@ -172,6 +175,10 @@ function loadComponent( moduleName, componentType, componentSource ) {
             } else if ( 0 === modulesToLoadCount ) {
                 nextTick( onComplete );
             }
+            progressEventName && window.dispatchEvent( new CustomEvent( progressEventName, { detail: {
+                type: 'module',
+                moduleName: moduleName
+            }}));
         }
     }
 
@@ -182,6 +189,7 @@ function loadComponent( moduleName, componentType, componentSource ) {
             nextTick( onModuleLoaded );
         }
         progressEventName && window.dispatchEvent( new CustomEvent( progressEventName, { detail: {
+            type: 'component',
             rate: rate,
             moduleName: moduleName,
             componentType: componentType,
