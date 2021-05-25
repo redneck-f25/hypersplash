@@ -1,9 +1,9 @@
 {
-    "jquery": [ { "js": [ "//code.jquery.com/jquery-3.2.1.min.js" ] } ],
-    "bootstrap-delay": [ [ "jquery" ], { "js": "//friday.w3tools.de/cgi-bin/sleep1.cgi" } ],
+    "jquery": [ { "js": [ "http://code.jquery.com/jquery-3.2.1.min.js" ] } ],
+    "bootstrap-delay": [ [ "jquery" ], { "js": "http://friday.w3tools.de/cgi-bin/sleep1.cgi" } ],
     "bootstrap": [ [ "bootstrap-delay" ], {
-        "js": [ "//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ],
-        "css": [ "//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" ]
+        "js": [ "http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ],
+        "css": [ "http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" ]
     }],
     "lib1": [ [ "bootstrap" ], {
         "js":  "js/lib1.js",
